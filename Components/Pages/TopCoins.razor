@@ -1,0 +1,52 @@
+@page "/topcoins"
+@using DarraghConway_CA1.Client.Services
+@using DarraghConway_CA1.Client.Models
+@inject CoinMarketCapService CoinService
+
+<h3>Top 10 Cryptocurrencies</h3>
+
+@if (cryptos is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Name</th>
+            <th>Symbol</th>
+            <th>Price (USD)</th>
+            <th>Market Cap (USD)</th>
+            <th>24h Change</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var c in cryptos)
+        {
+            var usd = c.Quote?["USD"];
+            <tr>
+                <td>@c.CmcRank</td>
+                <td>@c.Name</td>
+                <td>@c.Symbol</td>
+                <td>@(usd?.Price.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</td>
+                <td>@(usd?.MarketCap.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</td>
+                <td style="color:@((usd?.PercentChange24h ?? 0) >= 0 ? "green" : "red")">
+                    @(usd?.PercentChange24h.ToString("0.00"))%
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+}
+
+@code {
+    private List<CryptoListing>? cryptos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cryptos = await CoinService.GetLatestAsync(20);
+    }
+}
