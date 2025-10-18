@@ -34,3 +34,32 @@ public class QuoteCurrency
     [JsonPropertyName("market_cap")]
     public decimal MarketCap { get; set; }
 }
+
+
+public class CryptoPanicResponse
+{
+    [JsonPropertyName("results")]
+    public List<CryptoPanicPost>? Results { get; set; }
+}
+
+public class CryptoPanicPost
+{
+    [JsonPropertyName("title")] public string? Title { get; set; }
+    
+    [JsonPropertyName("url")] public string? Url { get; set; }
+    
+    [JsonPropertyName("news_url")] public string? NewsUrl { get; set; }
+    
+    [JsonPropertyName("source")] public CryptoPanicSource? Source { get; set; }
+    
+    [JsonPropertyName("id")] public long Id { get; set; }
+    [JsonPropertyName("slug")] public string? Slug { get; set; }
+
+    [JsonPropertyName("domain")] public string? Domain { get; set; }
+    [JsonPropertyName("published_at")] public DateTime PublishedAt { get; set; }
+}
+
+public class CryptoPanicSource
+{
+    [JsonPropertyName("url")] public string? Url { get; set; }
+}

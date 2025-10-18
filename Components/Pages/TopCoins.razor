@@ -2,6 +2,7 @@
 @using DarraghConway_CA1.Client.Services
 @using DarraghConway_CA1.Client.Models
 @inject CoinMarketCapService CoinService
+@inject NavigationManager Nav
 
 <h3>Top 10 Cryptocurrencies</h3>
 
@@ -26,7 +27,7 @@ else
         @foreach (var c in cryptos)
         {
             var usd = c.Quote?["USD"];
-            <tr>
+            <tr style="cursor:pointer" onclick="location.href='@($"/coin/{c.Symbol}")'">
                 <td>@c.CmcRank</td>
                 <td>@c.Name</td>
                 <td>@c.Symbol</td>
@@ -36,6 +37,7 @@ else
                     @(usd?.PercentChange24h.ToString("0.00"))%
                 </td>
             </tr>
+
         }
         </tbody>
     </table>
@@ -48,5 +50,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         cryptos = await CoinService.GetLatestAsync(20);
+    }
+
+    private void NavigateToCoin(string symbol)
+    {
+        Nav.NavigateTo($"/coin/{symbol}");
     }
 }

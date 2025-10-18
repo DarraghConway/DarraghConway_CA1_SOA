@@ -3,24 +3,23 @@ using DarraghConway_CA1.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Razor components – using Server interactivity only
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+// Typed HttpClients for your services
 builder.Services.AddHttpClient<CoinMarketCapService>();
+builder.Services.AddHttpClient<CryptoPanicService>();  // <-- change this line
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-
-
 app.UseAntiforgery();
 
 app.MapStaticAssets();
