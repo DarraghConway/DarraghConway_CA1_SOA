@@ -58,3 +58,48 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+
+.tip-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.tip-bubble {
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 10px);          /* show BELOW the text */
+    transform: translateX(-50%);
+    background: #0d1117;
+    color: #f0f0f0;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    border: 1px solid rgba(255,255,255,.1);
+    opacity: 0;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 1050;                    /* be on top */
+}
+
+.tip-wrap:hover .tip-bubble {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* keep the arrow optional (below) */
+.tip-bubble::after {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #0d1117;
+}
+
+/* ensure the table doesn't clip the tooltip */
+.table-responsive { overflow: visible !important; }

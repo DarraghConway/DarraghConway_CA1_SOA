@@ -1,4 +1,5 @@
 using DarraghConway_CA1.Client.Services;
+using DarraghConway_CA1.Client.Services.Abstractions;
 using DarraghConway_CA1.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,9 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Typed HttpClients for your services
-builder.Services.AddHttpClient<CoinMarketCapService>();
-builder.Services.AddHttpClient<CryptoPanicService>();  // <-- change this line
+// Register typed clients against interfaces
+builder.Services.AddHttpClient<IMarketDataService, CoinMarketCapService>();
+builder.Services.AddHttpClient<INewsService, CryptoPanicService>();
 
 var app = builder.Build();
 

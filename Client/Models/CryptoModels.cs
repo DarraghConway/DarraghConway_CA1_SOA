@@ -10,6 +10,9 @@ public class CoinMarketCapResponse
 
 public class CryptoListing
 {
+    [JsonPropertyName("id")]
+    public int Id { get; set; }
+    
     [JsonPropertyName("cmc_rank")]
     public int CmcRank { get; set; }
 

@@ -1,7 +1,7 @@
 @page "/coin/{symbol}"
-@using DarraghConway_CA1.Client.Services
+@using DarraghConway_CA1.Client.Services.Abstractions
 @using DarraghConway_CA1.Client.Models
-@inject CryptoPanicService News
+@inject INewsService News
 @rendermode InteractiveServer
 
 <h3>News for @symbol</h3>
@@ -36,7 +36,6 @@ else
                 <small> — @p.Domain • @p.PublishedAt.ToLocalTime().ToString("dd MMM HH:mm")</small>
             </li>
         }
-
     </ul>
 }
 
@@ -50,7 +49,4 @@ else
             ? new()
             : await News.GetPostsForSymbolAsync(symbol.ToUpperInvariant());
     }
-
-    private static string? GetLink(CryptoPanicPost p)
-        => p.NewsUrl ?? p.Url ?? p.Source?.Url;
 }
