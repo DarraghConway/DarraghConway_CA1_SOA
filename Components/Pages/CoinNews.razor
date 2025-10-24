@@ -2,41 +2,71 @@
 @using DarraghConway_CA1.Client.Services.Abstractions
 @using DarraghConway_CA1.Client.Models
 @inject INewsService News
+@inject NavigationManager Nav
 @rendermode InteractiveServer
 
-<h3>News for @symbol</h3>
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h3 class="mb-0">
+        News for <span class="badge bg-primary bg-opacity-10 text-primary border border-primary">@symbol.ToUpperInvariant()</span>
+    </h3>
+    <a class="btn btn-sm btn-outline-secondary" href="/topcoins" data-blazor-nav="false">← Back to Top Coins</a>
+
+</div>
 
 @if (items is null)
 {
-    <p><em>Loading...</em></p>
+    <div class="d-flex align-items-center text-muted">
+        <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+        Loading latest headlines…
+    </div>
 }
 else if (items.Count == 0)
 {
-    <p>No recent posts.</p>
+    <div class="alert alert-light border d-flex align-items-center" role="alert">
+        <div class="me-2">📰</div>
+        <div>No recent posts for <strong>@symbol</strong>. Try again later.</div>
+    </div>
 }
 else
 {
-    <ul>
-        @foreach (var p in items)
-        {
-            var link =
-                p.NewsUrl
-                ?? p.Url
-                ?? p.Source?.Url
-                ?? (p.Id > 0 ? $"https://cryptopanic.com/news/{p.Id}" : null)
-                ?? $"https://cryptopanic.com/search/?q={Uri.EscapeDataString(p.Title ?? symbol)}";
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <ul class="list-group list-group-flush">
+                @foreach (var p in items)
+                {
+                    var link = p.NewsUrl
+                               ?? p.Url
+                               ?? p.Source?.Url
+                               ?? (p.Id > 0 ? $"https://cryptopanic.com/news/{p.Id}" : null)
+                               ?? $"https://cryptopanic.com/search/?q={Uri.EscapeDataString(p.Title ?? symbol)}";
 
-            <li>
-                <a href="@link"
-                   target="_blank"
-                   rel="noopener noreferrer"
-                   data-blazor-nav="false">
-                    @p.Title
-                </a>
-                <small> — @p.Domain • @p.PublishedAt.ToLocalTime().ToString("dd MMM HH:mm")</small>
-            </li>
-        }
-    </ul>
+                    <li class="list-group-item py-3">
+                        <div class="d-flex flex-column gap-1">
+                            <a class="fw-semibold text-decoration-none"
+                               href="@link"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               data-blazor-nav="false">
+                                @p.Title <span class="text-muted">↗</span>
+                            </a>
+
+                            <div class="d-flex flex-wrap gap-2 small text-muted">
+                                @if (!string.IsNullOrWhiteSpace(p.Domain))
+                                {
+                                    <span class="badge rounded-pill text-bg-light border">
+                                        @p.Domain
+                                    </span>
+                                }
+                                <span class="text-muted">
+                                    @p.PublishedAt.ToLocalTime().ToString("ddd, dd MMM HH:mm")
+                                </span>
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
 }
 
 @code {
