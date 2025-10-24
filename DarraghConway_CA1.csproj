@@ -6,4 +6,31 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="FluentAssertions" Version="8.8.0" />
+      <PackageReference Include="NUnit" Version="4.4.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="DarraghConway_CA1.Tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="DarraghConway_CA1.Tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Remove="DarraghConway_CA1.Tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="DarraghConway_CA1.Tests\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="DarraghConway_CA1.Tests\obj\DarraghConway_CA1.Tests.csproj.nuget.dgspec.json" />
+      <_ContentIncludedByDefault Remove="DarraghConway_CA1.Tests\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="DarraghConway_CA1.Tests\obj\project.packagespec.json" />
+    </ItemGroup>
+
 </Project>
