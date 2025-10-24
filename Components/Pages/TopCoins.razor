@@ -1,9 +1,9 @@
 @page "/"
 @page "/topcoins"
+
 @using DarraghConway_CA1.Client.Services.Abstractions
 @using DarraghConway_CA1.Client.Models
 @inject IMarketDataService MarketData
-@inject NavigationManager Nav
 
 <h3 class="mb-3">Top 20 Cryptocurrencies</h3>
 
@@ -17,7 +17,29 @@
 else
 {
     <div class="card shadow-sm">
-        <div class="card-body p-0">
+        <div class="card-body">
+            
+            <form method="get" action="/topcoins" class="row g-2 align-items-center mb-3">
+                <div class="col-12 col-md-8">
+                    <input class="form-control"
+                           name="q"
+                           value="@q"
+                           placeholder="Search by name or symbol…" />
+                </div>
+
+                <div class="col-8 col-md-3">
+                    <select class="form-select" name="filter">
+                        <option value=""        selected="@(IsSelectedFilter("")        ? "selected" : null)">All</option>
+                        <option value="Gainers" selected="@(IsSelectedFilter("Gainers") ? "selected" : null)">Gainers (24h ≥ 0%)</option>
+                        <option value="Losers"  selected="@(IsSelectedFilter("Losers")  ? "selected" : null)">Losers (24h &lt; 0%)</option>
+                    </select>
+                </div>
+
+                <div class="col-4 col-md-1 d-grid">
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                </div>
+            </form>
+
             <div class="table-responsive" style="overflow-y: visible;">
                 <table class="table table-sm table-striped table-hover align-middle mb-0">
                     <thead class="table-light">
@@ -32,32 +54,29 @@ else
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var c in cryptos)
+                        @foreach (var c in DisplayedCoins)
                         {
-                            var usd = c.Quote?["USD"];
+                            var usd = GetUsd(c);
                             var change = usd?.PercentChange24h ?? 0m;
                             var changeClass = change >= 0
                                 ? "bg-success bg-opacity-10 text-success border border-success"
                                 : "bg-danger bg-opacity-10 text-danger border border-danger";
 
-                            <tr role="button"
-                                style="cursor:pointer"
-                                onclick="location.href='@($"/coin/{c.Symbol}")'">
+                            <tr>
                                 <td class="text-center fw-semibold align-middle">@c.CmcRank</td>
                                 <td class="align-middle">
                                     <img src="@($"https://s2.coinmarketcap.com/static/img/coins/64x64/{c.Id}.png")"
                                          alt="@c.Name logo" width="28" height="28"
                                          class="rounded-circle shadow-sm" />
                                 </td>
-
-                                <!-- Inline tooltip inside the Name cell -->
                                 <td class="fw-semibold align-middle position-relative">
-                                    <span class="tip-wrap">
-                                        @c.Name
-                                        <span class="tip-bubble">📰 Click to view @c.Symbol news</span>
-                                    </span>
+                                    <a class="text-decoration-none" href="/coin/@c.Symbol" data-blazor-nav="false">
+                                        <span class="tip-wrap">
+                                            @c.Name
+                                            <span class="tip-bubble">📰 Click to view @c.Symbol news</span>
+                                        </span>
+                                    </a>
                                 </td>
-
                                 <td class="text-muted align-middle">@c.Symbol</td>
                                 <td class="text-end text-nowrap align-middle">
                                     @(usd?.Price.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-US")))
@@ -72,6 +91,11 @@ else
                         }
                     </tbody>
                 </table>
+
+                @if (!DisplayedCoins.Any())
+                {
+                    <div class="text-muted small py-3 text-center">No coins match your filters.</div>
+                }
             </div>
         </div>
     </div>
@@ -79,10 +103,50 @@ else
 
 @code {
     private List<CryptoListing>? cryptos;
+    
+    [SupplyParameterFromQuery(Name = "q")]
+    public string? q { get; set; }
 
-    protected override async Task OnInitializedAsync()
-        => cryptos = await MarketData.GetLatestAsync(20);
+    [SupplyParameterFromQuery(Name = "filter")]
+    public string? filter { get; set; }   // "", "Gainers", "Losers"
 
-    private void NavigateToCoin(string symbol)
-        => Nav.NavigateTo($"/coin/{symbol}");
+    protected override async Task OnParametersSetAsync()
+    {
+        cryptos ??= await MarketData.GetLatestAsync(20);
+    }
+
+    private QuoteCurrency? GetUsd(CryptoListing c)
+        => c.Quote is not null && c.Quote.TryGetValue("USD", out var q) ? q : null;
+
+    private IEnumerable<CryptoListing> DisplayedCoins
+    {
+        get
+        {
+            if (cryptos is null) return Enumerable.Empty<CryptoListing>();
+            IEnumerable<CryptoListing> qset = cryptos;
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var s = q.Trim();
+                qset = qset.Where(c =>
+                    (!string.IsNullOrEmpty(c.Name) && c.Name.Contains(s, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(c.Symbol) && c.Symbol.Contains(s, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            // Filter
+            qset = (filter ?? "") switch
+            {
+                "Gainers" => qset.Where(c => (GetUsd(c)?.PercentChange24h ?? 0m) >= 0m),
+                "Losers"  => qset.Where(c => (GetUsd(c)?.PercentChange24h ?? 0m) <  0m),
+                _         => qset
+            };
+
+            // Default: rank order
+            return qset.OrderBy(c => c.CmcRank);
+        }
+    }
+
+    private bool IsSelectedFilter(string? val)
+        => string.Equals(filter ?? "", val ?? "", StringComparison.OrdinalIgnoreCase);
 }
